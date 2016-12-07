@@ -32,6 +32,7 @@
 #include <stdlib.h>
 
 #include "reqchannel.h"
+#include "netreqchannel.h"
 
 using namespace std;
 
@@ -169,17 +170,53 @@ void handle_process_loop(RequestChannel & _channel) {
   
 }
 
+void* connection_handler(void *arg) {
+
+	int fd = *(int *)arg;
+	char buf[127];
+	std::string request, response;
+
+	while(true) {
+		read(fd, buf, 127);
+		request = buf;
+		
+		if(request.compare("quit") == 0)
+			break;
+		
+		usleep(1000 + (rand() % 5000));
+		response = int2string(rand() % 100);
+
+		write(fd, response.c_str(), response.length()+1);
+	}
+
+	close(fd);
+	std::cout << "Connection closed\n";
+}
+
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char * argv[]) {
+	int p = 4500;
+	int b = 100;
+	
+	int opt;
+	while((opt = getopt(argc, argv, "p:b")) >= 0) {
+		switch(opt) {
+			case 'p':
+				p = atoi(optarg);
+				break;
+			case 'b':
+				b = atoi(optarg);
+				break;
+		}
+	}
 
-  //  cout << "Establishing control channel... " << flush;
-  RequestChannel control_channel("control", RequestChannel::SERVER_SIDE);
-  //  cout << "done.\n" << flush;
+	std::cout << "Starting server on port " << p << ", backlog " << b << std::endl;
 
-  handle_process_loop(control_channel);
+	NetworkRequestChannel server(p, connection_handler, b);
 
+	server.~NetworkRequestChannel();
 }
 

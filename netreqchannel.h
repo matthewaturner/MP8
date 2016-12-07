@@ -23,8 +23,13 @@
 
 #include <iostream>
 #include <fstream>
-
 #include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
@@ -47,13 +52,11 @@ class NetworkRequestChannel {
 public:
 
 	typedef enum {SERVER_SIDE, CLIENT_SIDE} Side;
- 
 	typedef enum {READ_MODE, WRITE_MODE} Mode;
 
 private:
 
-	std::string   my_name;
-	Side     my_side;
+	int sockfd;
 
   /*  The current implementation uses named pipes. */ 
   /*
@@ -71,7 +74,8 @@ public:
 	/* Creates a CLIENT-SIDE local copy of the channel. The channel is connected
 	to the given port number at the given server host. THIS CONTRUCTOR IS CALLED
 	BY THE CLIENT. */
-	NetworkRequestChannel(const unsigned short _port_no, void *(*connection_handler)(int *));
+	NetworkRequestChannel(const unsigned short _port_no, void *(*connection_handler)(void *),
+	                      int backlog);
 	/* Creates a SERVER-SIDE local copy of the channel that is accepting
 	connections at the given port number. NOTE that multiple clients can be
 	connected to the same server-side end of the request channel. Whenever a new
@@ -80,7 +84,7 @@ public:
 	descriptor of the slave socket returned by the accept call. NOTE that the
 	connection handler does not want to deal with closing the socket. You will
 	have to close the socket once the connection handler is done. */
-	~NetworkRequesChannel();
+	~NetworkRequestChannel();
 	/* Destructor of the local copy of the channel. */
 	std::string send_request(std::string _request);
 	/* Send a string over the channel and wait for a reply. */
@@ -93,5 +97,3 @@ public:
 };
 
 #endif
-
-
