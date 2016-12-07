@@ -10,12 +10,6 @@
 */
 
 /*--------------------------------------------------------------------------*/
-/* DEFINES */
-/*--------------------------------------------------------------------------*/
-
-    /* -- (none) -- */
-
-/*--------------------------------------------------------------------------*/
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 
@@ -35,18 +29,6 @@
 #include "netreqchannel.h"
 
 using namespace std;
-
-/*--------------------------------------------------------------------------*/
-/* DATA STRUCTURES */ 
-/*--------------------------------------------------------------------------*/
-
-    /* -- (none) -- */
-
-/*--------------------------------------------------------------------------*/
-/* CONSTANTS */
-/*--------------------------------------------------------------------------*/
-
-    /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
 /* VARIABLES */
@@ -172,24 +154,34 @@ void handle_process_loop(RequestChannel & _channel) {
 
 void* connection_handler(void *arg) {
 
+	/* the file descriptor of the socket we are communicating over */
 	int fd = *(int *)arg;
+	/* variables for requests and responses */
 	char buf[127];
 	std::string request, response;
 
 	while(true) {
+		
+		// read a request from the network connection
 		read(fd, buf, 127);
 		request = buf;
 		
+		// quit when we receive a quit message
 		if(request.compare("quit") == 0)
 			break;
 		
+		// the code that generates the responses (given)
 		usleep(1000 + (rand() % 5000));
 		response = int2string(rand() % 100);
 
+		// write the response back through the connection
 		write(fd, response.c_str(), response.length()+1);
 	}
 
+	/* if this isn't closed we have hanging threads because they will 
+	   still have open sockets */
 	close(fd);
+
 	std::cout << "Connection closed.\n";
 }
 
@@ -198,6 +190,8 @@ void* connection_handler(void *arg) {
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char * argv[]) {
+
+	// argument handling
 	int p = 22565;
 	int b = 20;
 
@@ -224,8 +218,12 @@ int main(int argc, char * argv[]) {
 
 	std::cout << "Starting server on port " << p << ", with backlog " << b << std::endl;
 
+	// start the server
 	NetworkRequestChannel server(p, connection_handler, b);
 
+	/* make sure the server closes properly
+	   however! we never reach this point if we close the program with CTRL-Z and
+	   must close it manually */
 	server.~NetworkRequestChannel();
 }
 

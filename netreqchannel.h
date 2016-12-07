@@ -47,6 +47,15 @@
 /* CLASS   R e q u e s t C h a n n e l */
 /*--------------------------------------------------------------------------*/
 
+/* Steps to create a network connection:
+ 1 - (Create) server socket
+ 2 - (Bind) the server socket to a specific port (on the server's machine)
+ 3 - (Listen) on the bound socket
+ 4 - (Create) the client side socket
+ 5 - (Connect) to the server socket
+ 6 - Server socket will (Accept) the client side connect call
+*/
+
 class NetworkRequestChannel {
 
 public:
@@ -57,16 +66,6 @@ public:
 private:
 
 	int sockfd;
-
-  /*  The current implementation uses named pipes. */ 
-  /*
-  int wfd;
-  int rfd;
-
-  char * pipe_name(Mode _mode);
-  void open_read_pipe(char * _pipe_name);
-  void open_write_pipe(char * _pipe_name);
-  */
 
 public:
 

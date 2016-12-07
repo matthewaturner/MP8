@@ -109,6 +109,8 @@ int NetworkRequestChannel::cwrite(std::string _msg) {
 }
 
 std::string NetworkRequestChannel::send_request(std::string _request) {
+/* do not use this function to push quit messages because the thread will
+   hang on the cread() call */
 	cwrite(_request);
 	return cread();
 }
