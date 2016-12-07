@@ -227,34 +227,62 @@ void* st_func(void* arg) {
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char * argv[]) {
-    int n = 10; // default number of requests per "patient"
-    int b = 50; // default size of request_buffer
-    int w = 10; // default number of worker threads
-    std::string h = "127.0.0.1";  // name of the server host
-    int p = 4500;  // port number for the server host
-    bool USE_ALTERNATE_FILE_OUTPUT = false;
-    int opt = 0;
+	int n = 20;//number of requests per person
+	int b = 50;//size of bounded buffer
+	int w = 6;//number of request channels
+	string h = "127.0.0.1";//hostname
+	unsigned short p = 22565; 
 
-/*
-    std::cout << "something " << std::endl;
-    while ((opt = getopt(argc, argv, "n:b:w:h:p")) != -1) {
-        switch (opt) {
-            case 'n':
-                n = atoi(optarg);
+	int opt;
+	while((opt = getopt(argc, argv, "n:b:w:h:p:")) != -1)
+	{
+	switch(opt)
+        {
+	case 'p':
+		p = (unsigned short) strtol(optarg, NULL, 0);
+		if(p < 1)
+		{
+			std::cout << "invalid option p" << std::endl;
+			return -1;
+                }
                 break;
-            case 'b':
-                b = atoi(optarg);
-                break;
-            case 'w':
-                w = atoi(optarg);
-                break;
-	    case 'h':
-	    	h = optarg;
-                break;
-	    case 'p':
-	        p = atoi(optarg);
+	case 'h':
+		h = optarg;
+		if(h.empty())
+		{
+			std::cout << "invalid option h" << std::endl;
+			return -1;
+		}
 		break;
-            default:
+
+	case 'n':
+		n = (int) strtol(optarg, NULL, 0);
+		if(n < 1)
+		{
+			std::cout << "invalid option n" << std::endl;
+			return -1;
+		}
+		break;
+
+	case 'b':
+		b = (int) strtol(optarg, NULL, 0);
+		if(b < 0)
+		{
+			std::cout << "invalid option b" << std::endl;
+			return -1;
+		}
+		break;
+
+	case 'w':
+		w = (int) strtol(optarg, NULL, 0);
+		if(w < 1)
+		{
+			std::cout << "invalid option w" << std::endl;
+			return -1;
+		}
+		break;
+
+	default:
                 std::cout << "This program can be invoked with the following flags:" << std::endl;
                 std::cout << "-n [int]: number of requests per patient" << std::endl;
                 std::cout << "-b [int]: size of request buffer" << std::endl;
@@ -267,8 +295,7 @@ int main(int argc, char * argv[]) {
                 std::cout << "behavior is the same as using the -h flag." << std::endl;
                 exit(0);
         }
-    }
-    */
+	}
     
     int pid = 0; // fork();
     if(pid == 0) {
@@ -279,8 +306,8 @@ int main(int argc, char * argv[]) {
         int64_t start_usecs;
         int64_t finish_usecs;
         ofstream ofs;
-        if(USE_ALTERNATE_FILE_OUTPUT) ofs.open("output2.txt", ios::out | ios::app);
-        else ofs.open("output.txt", ios::out | ios::app);
+        // if(USE_ALTERNATE_FILE_OUTPUT) ofs.open("output2.txt", ios::out | ios::app);
+        // else ofs.open("output.txt", ios::out | ios::app);
         
         std::cout << "n == " << n << std::endl;
         std::cout << "b == " << b << std::endl;

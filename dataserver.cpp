@@ -190,7 +190,7 @@ void* connection_handler(void *arg) {
 	}
 
 	close(fd);
-	std::cout << "Connection closed\n";
+	std::cout << "Connection closed.\n";
 }
 
 /*--------------------------------------------------------------------------*/
@@ -198,22 +198,31 @@ void* connection_handler(void *arg) {
 /*--------------------------------------------------------------------------*/
 
 int main(int argc, char * argv[]) {
-	int p = 4500;
-	int b = 100;
-	
+	int p = 22565;
+	int b = 20;
+
 	int opt;
-	while((opt = getopt(argc, argv, "p:b")) >= 0) {
+	while((opt = getopt(argc, argv, "p:b:")) != -1) {
 		switch(opt) {
-			case 'p':
-				p = atoi(optarg);
-				break;
-			case 'b':
-				b = atoi(optarg);
-				break;
+		case 'p':
+			p = (int) strtol(optarg, NULL, 0);
+			if(p < 1) {
+				std::cout << "invalid option p" << std::endl;
+				return -1;
+			}
+			break;
+
+		case 'b':
+			b = (int) strtol(optarg, NULL, 0);
+			if(b < 0) {
+				std::cout << "invalid option b" << std::endl;
+			return -1;
+			}
+			break;
 		}
 	}
 
-	std::cout << "Starting server on port " << p << ", backlog " << b << std::endl;
+	std::cout << "Starting server on port " << p << ", with backlog " << b << std::endl;
 
 	NetworkRequestChannel server(p, connection_handler, b);
 
